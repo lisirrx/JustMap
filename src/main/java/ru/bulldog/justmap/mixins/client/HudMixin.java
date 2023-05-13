@@ -1,19 +1,14 @@
 package ru.bulldog.justmap.mixins.client;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.StatusEffectSpriteManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.util.math.MathHelper;
@@ -23,14 +18,17 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import ru.bulldog.justmap.client.JustMapClient;
 import ru.bulldog.justmap.client.config.ClientSettings;
 import ru.bulldog.justmap.enums.ScreenPosition;
 import ru.bulldog.justmap.util.colors.Colors;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 @Mixin(InGameHud.class)
-abstract class HudMixin extends DrawableHelper {
+abstract class HudMixin {
 
 	@Final
 	@Shadow
@@ -40,7 +38,7 @@ abstract class HudMixin extends DrawableHelper {
 	private int scaledWidth;
 
 	@Inject(at = @At("HEAD"), method = "renderStatusEffectOverlay", cancellable = true)
-	protected void renderStatusEffects(MatrixStack matrices, CallbackInfo info) {
+	protected void renderStatusEffects(DrawContext drawContext, CallbackInfo info) {
 		if (ClientSettings.moveEffects) {
 			int posX = this.scaledWidth;
 			int posY = ClientSettings.positionOffset;
@@ -48,12 +46,12 @@ abstract class HudMixin extends DrawableHelper {
 				posX = JustMapClient.getMiniMap().getSkinX();
 			}
 
-			this.drawMovedEffects(matrices, posX, posY);
+			this.drawMovedEffects(drawContext, posX, posY);
 			info.cancel();
 		}
 	}
 
-	private void drawMovedEffects(MatrixStack matrixStack, int screenX, int screenY) {
+	private void drawMovedEffects(DrawContext drawContext, int screenX, int screenY) {
 		Collection<StatusEffectInstance> statusEffects = this.client.player.getStatusEffects();
 		if (statusEffects.isEmpty()) return;
 
@@ -98,9 +96,9 @@ abstract class HudMixin extends DrawableHelper {
 		   		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		   		float alpha = 1.0F;
 		   		if (statusEffectInstance.isAmbient()) {
-		   			drawTexture(matrixStack, x, y, 165, 166, size, size);
+		   			drawContext.drawTexture(HandledScreen.BACKGROUND_TEXTURE, x, y, 165, 166, size, size);
 		   		} else {
-			   		drawTexture(matrixStack, x, y, 141, 166, size, size);
+			   		drawContext.drawTexture(HandledScreen.BACKGROUND_TEXTURE, x, y, 141, 166, size, size);
 			  		if (effectDuration <= 200) {
 				  		int m = 10 - effectDuration / 20;
 				 		alpha = MathHelper.clamp(effectDuration / 10F / 5F * 0.5F, 0F, 0.5F) + MathHelper.cos((float) (effectDuration * Math.PI) / 5F) * MathHelper.clamp(m / 10F * 0.25F, 0.0F, 0.25F);
@@ -113,11 +111,11 @@ abstract class HudMixin extends DrawableHelper {
 		   		icons.add(() -> {
 					RenderSystem.setShaderTexture(0, sprite.getAtlasId());
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, fa);
-					drawSprite(matrixStack, fx + 3, fy + 3, 0, 18, 18, sprite);
+					drawContext.drawSprite( fx + 3, fy + 3, 0, 18, 18, sprite);
 		   		});
 		   		if (ClientSettings.showEffectTimers) {
 			   		timers.add(() ->
-						drawCenteredTextWithShadow(matrixStack, client.textRenderer, convertDuration(effectDuration), fx + size / 2, fy + (size + 1), Colors.WHITE));
+							drawContext.drawCenteredTextWithShadow(client.textRenderer, convertDuration(effectDuration), fx + size / 2, fy + (size + 1), Colors.WHITE));
 		   		}
 			}
 	 	}

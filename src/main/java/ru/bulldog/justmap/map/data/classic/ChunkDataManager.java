@@ -1,14 +1,5 @@
 package ru.bulldog.justmap.map.data.classic;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Optional;
-
 import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
@@ -18,16 +9,18 @@ import net.minecraft.world.ChunkSerializer;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
-import net.minecraft.world.chunk.ReadOnlyChunk;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.WrapperProtoChunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.storage.VersionedChunkStorage;
-
 import ru.bulldog.justmap.JustMap;
 import ru.bulldog.justmap.util.CurrentWorldPos;
 import ru.bulldog.justmap.util.storage.StorageUtil;
 import ru.bulldog.justmap.util.tasks.MemoryUtil;
 import ru.bulldog.justmap.util.tasks.TaskManager;
+
+import java.io.IOException;
+import java.util.*;
 
 class ChunkDataManager {
 	private final static TaskManager chunkProcessor = TaskManager.getManager("chunk-processor");
@@ -126,8 +119,8 @@ class ChunkDataManager {
 			if (chunkTag == null) return this.emptyChunk;
 			Chunk chunk = ChunkSerializer.deserialize(
 					serverWorld, serverWorld.getPointOfInterestStorage(), chunkPos, chunkTag);
-			if (chunk instanceof ReadOnlyChunk) {
-				return ((ReadOnlyChunk) chunk).getWrappedChunk();
+			if (chunk instanceof WrapperProtoChunk) {
+				return ((WrapperProtoChunk) chunk).getWrappedChunk();
 			}
 			return this.emptyChunk;
 		} catch (Exception ex) {

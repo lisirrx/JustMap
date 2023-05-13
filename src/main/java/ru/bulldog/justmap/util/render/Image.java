@@ -1,9 +1,9 @@
 package ru.bulldog.justmap.util.render;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public abstract class Image {
@@ -22,7 +22,7 @@ public abstract class Image {
 		this.image = image;
 	}
 
-	public abstract void draw(MatrixStack matrices, double x, double y, int w, int h);
+	public abstract void draw(DrawContext drawContext, double x, double y, int w, int h);
 
 	public int getWidth() {
 		return this.width;
@@ -40,21 +40,17 @@ public abstract class Image {
 		RenderUtil.bindTexture(textureId);
 	}
 
-	public void draw(double x, double y) {
-		MatrixStack matrices = new MatrixStack();
-		this.draw(matrices, x, y, this.getWidth(), this.getHeight());
+	public void draw(DrawContext drawContext, double x, double y) {
+		this.draw(drawContext, x, y, this.getWidth(), this.getHeight());
 	}
 
-	public void draw(double x, double y, int size) {
-		MatrixStack matrices = new MatrixStack();
-		this.draw(matrices, x, y, size, size);
+
+
+	public void draw(DrawContext drawContext, double x, double y, int size) {
+		this.draw(drawContext, x, y, size, size);
 	}
 
-	public void draw(MatrixStack matrices, double x, double y, int size) {
-		this.draw(matrices, x, y, size, size);
-	}
-
-	protected void draw(MatrixStack matrices, double x, double y, float w, float h) {
-		RenderUtil.drawImage(matrices, this, x, y, w, h);
+	protected void draw(DrawContext drawContext, double x, double y, float w, float h) {
+		RenderUtil.drawImage(drawContext, this, x, y, w, h);
 	}
 }

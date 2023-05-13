@@ -1,16 +1,15 @@
 package ru.bulldog.justmap.client.render;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.util.math.RotationAxis;
-import org.joml.Vector3f;
 import ru.bulldog.justmap.client.JustMapClient;
 import ru.bulldog.justmap.client.config.ClientSettings;
 import ru.bulldog.justmap.util.math.MathUtil;
@@ -20,7 +19,7 @@ public class EntityModelRenderer {
 	private static final MinecraftClient minecraft = MinecraftClient.getInstance();
 	private static final EntityRenderDispatcher renderDispatcher = minecraft.getEntityRenderDispatcher();
 
-	public static void renderModel(MatrixStack matrices, VertexConsumerProvider consumerProvider, Entity entity, double x, double y) {
+	public static void renderModel(DrawContext drawContext, VertexConsumerProvider consumerProvider, Entity entity, double x, double y) {
 
 		LivingEntity livingEntity = (LivingEntity) entity;
 
@@ -36,22 +35,22 @@ public class EntityModelRenderer {
 		float scale = (float) getScale(livingEntity);
 		int modelSize = ClientSettings.entityModelSize;
 
-		matrices.push();
-		matrices.translate(x, y, 0);
-		matrices.translate(modelSize / 4, modelSize / 2, 0);
+		drawContext.getMatrices().push();
+		drawContext.getMatrices().translate(x, y, 0);
+		drawContext.getMatrices().translate(modelSize / 4, modelSize / 2, 0);
 		if (ClientSettings.rotateMap) {
 			float rotation = (float) MathUtil.correctAngle(minecraft.player.headYaw);
-			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
+			drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
 		} else {
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+			drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
 		}
-		matrices.push();
-		matrices.scale(scale, scale, scale);
+		drawContext.getMatrices().push();
+		drawContext.getMatrices().scale(scale, scale, scale);
 		renderDispatcher.setRenderShadows(false);
-		renderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, matrices, consumerProvider, 240);
+		renderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, drawContext.getMatrices(), consumerProvider, 240);
 		renderDispatcher.setRenderShadows(true);
-		matrices.pop();
-		matrices.pop();
+		drawContext.getMatrices().pop();
+		drawContext.getMatrices().pop();
 
 		livingEntity.setPitch(pitch);
 		livingEntity.headYaw = headYaw;

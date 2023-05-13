@@ -1,9 +1,9 @@
 package ru.bulldog.justmap.map.icon;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -28,7 +28,7 @@ public class EntityIcon extends MapIcon<EntityIcon> {
 	}
 
 	@Override
-	public void draw(MatrixStack matrices, VertexConsumerProvider consumerProvider, int mapX, int mapY, int mapW, int mapH, float rotation) {
+	public void draw(DrawContext drawContext, VertexConsumerProvider consumerProvider, int mapX, int mapY, int mapW, int mapH, float rotation) {
 		if (!GameRulesUtil.allowCreatureRadar() && !hostile) { return; }
 		if (!GameRulesUtil.allowHostileRadar() && hostile) { return; }
 
@@ -43,7 +43,7 @@ public class EntityIcon extends MapIcon<EntityIcon> {
 		this.updatePos(mapX, mapY, mapW, mapH, size);
 		if (!allowRender) return;
 		if (ClientSettings.renderEntityModel) {
-			EntityModelRenderer.renderModel(matrices, consumerProvider, entity, iconPos.x, iconPos.y);
+			EntityModelRenderer.renderModel(drawContext, consumerProvider, entity, iconPos.x, iconPos.y);
 		} else if (ClientSettings.showEntityHeads) {
 			EntityHeadIconImage icon = EntityHeadIconImage.getIcon(entity);
 			if (icon != null) {
@@ -63,15 +63,15 @@ public class EntityIcon extends MapIcon<EntityIcon> {
 				double moveX = iconPos.x + size / 2;
 				double moveY = iconPos.y + size / 2;
 				float scale = MathUtil.clamp(1.0F / ClientSettings.mapScale, 0.5F, 1.5F);
-				matrices.push();
-				matrices.translate(moveX, moveY, 0.0);
+				drawContext.getMatrices().push();
+				drawContext.getMatrices().translate(moveX, moveY, 0.0);
 				if (ClientSettings.rotateMap) {
-					matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation + 180.0F));
+					drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation + 180.0F));
 				}
-				matrices.scale(scale, scale, 1.0F);
-				matrices.translate(-moveX, -moveY, 0.0);
-				icon.draw(matrices, iconPos.x, iconPos.y, size);
-				matrices.pop();
+				drawContext.getMatrices().scale(scale, scale, 1.0F);
+				drawContext.getMatrices().translate(-moveX, -moveY, 0.0);
+				icon.draw(drawContext, iconPos.x, iconPos.y, size);
+				drawContext.getMatrices().pop();
 				RenderUtil.texEnvMode(GLC.GL_MODULATE);
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			} else {

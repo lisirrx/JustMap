@@ -49,10 +49,10 @@ public class JustMapClient implements ClientModInitializer {
 			Colors.INSTANCE.loadData();
 		});
 		ClientChunkEvents.CHUNK_LOAD.register(MapDataProvider.getManager()::onChunkLoad);
-		HudRenderCallback.EVENT.register((matrices, delta) -> {
+		HudRenderCallback.EVENT.register((drawContext, delta) -> {
 			if (!minecraft.options.debugEnabled) {
-				JustMapClient.minimap.getRenderer().renderMap(matrices);
-				AdvancedInfo.getInstance().draw(matrices);
+				JustMapClient.minimap.getRenderer().renderMap(drawContext);
+				AdvancedInfo.getInstance().draw(drawContext);
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

@@ -1,18 +1,16 @@
 package ru.bulldog.justmap.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
-
 import ru.bulldog.justmap.JustMap;
 import ru.bulldog.justmap.map.data.MapDataProvider;
 import ru.bulldog.justmap.util.LangUtil;
@@ -71,20 +69,20 @@ public class WorldnameScreen extends Screen {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
-		drawCenteredTextWithShadow(matrices, textRenderer, LangUtil.getString("gui", "worldname_title"), center, y + 25, Colors.WHITE);
+	public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+		this.renderBackground(drawContext);
+		drawContext.drawCenteredTextWithShadow( textRenderer, LangUtil.getString("gui", "worldname_title"), center, y + 25, Colors.WHITE);
 		for (Element child : children()) {
 			if (child instanceof Drawable) {
-				((Drawable) child).render(matrices, mouseX, mouseY, delta);
+				((Drawable) child).render(drawContext, mouseX, mouseY, delta);
 			}
 		}
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(drawContext, mouseX, mouseY, delta);
 	}
 
 	@Override
-	public void renderBackground(MatrixStack matrices) {
-		super.renderBackground(matrices);
+	public void renderBackground(DrawContext drawContext) {
+		super.renderBackground(drawContext);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderUtil.bindTexture(FRAME_TEXTURE);

@@ -1,15 +1,14 @@
 package ru.bulldog.justmap.advancedinfo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-
+import net.minecraft.client.gui.DrawContext;
 import ru.bulldog.justmap.client.config.ClientSettings;
 import ru.bulldog.justmap.enums.ScreenPosition;
 import ru.bulldog.justmap.enums.TextAlignment;
 import ru.bulldog.justmap.enums.TextPosition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextManager {
 	private TextPosition textPosition = TextPosition.RIGHT;
@@ -22,7 +21,7 @@ public class TextManager {
 		this.elements = new ArrayList<>();
 	}
 
-	public void draw(MatrixStack matrixStack) {
+	public void draw(DrawContext drawContext) {
 		int yp = this.y;
 		for (InfoText line : elements) {
 			if (!line.visible) continue;
@@ -37,7 +36,7 @@ public class TextManager {
 					yp += spacing;
 				}
 			}
-			line.draw(matrixStack);
+			line.draw(drawContext);
 		}
 	}
 

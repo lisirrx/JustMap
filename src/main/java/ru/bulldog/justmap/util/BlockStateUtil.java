@@ -1,10 +1,13 @@
 package ru.bulldog.justmap.util;
 
+import com.google.common.collect.Sets;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.state.property.Properties;
+
+import java.util.Set;
 
 public class BlockStateUtil {
 	public static final BlockState AIR = Blocks.AIR.getDefaultState();
@@ -20,8 +23,8 @@ public class BlockStateUtil {
 	}
 
 	public static boolean isLiquid(BlockState state, boolean lava) {
-		Material material = state.getMaterial();
-		return material.isLiquid() && (lava || material != Material.LAVA);
+
+		return state.isLiquid() && (lava || state.getBlock() != Blocks.LAVA);
 	}
 
 	public static boolean isWater(BlockState state) {
@@ -29,14 +32,19 @@ public class BlockStateUtil {
 	}
 
 	public static boolean isPlant(BlockState state) {
-		Material material = state.getMaterial();
-		return material == Material.PLANT || material == Material.REPLACEABLE_PLANT ||
+		// todo
+		Set<Block> PLANT_BLOCKS = Sets.newHashSet(Blocks.PITCHER_PLANT,
+				Blocks.WEEPING_VINES_PLANT,
+				Blocks.KELP_PLANT,
+				Blocks.CHORUS_PLANT,
+				Blocks.CAVE_VINES_PLANT,
+				Blocks.TWISTING_VINES_PLANT);
+		return PLANT_BLOCKS.contains(state.getBlock()) ||
 			   isSeaweed(state);
 	}
 
 	public static boolean isSeaweed(BlockState state) {
-		Material material = state.getMaterial();
-		return material == Material.UNDERWATER_PLANT || material == Material.REPLACEABLE_UNDERWATER_PLANT;
+		return state.getBlock() == Blocks.KELP_PLANT;
 	}
 
 	public static boolean isWaterlogged(BlockState state) {

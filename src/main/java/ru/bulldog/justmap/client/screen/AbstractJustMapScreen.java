@@ -1,22 +1,21 @@
 package ru.bulldog.justmap.client.screen;
 
-import java.util.HashMap;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-
 import ru.bulldog.justmap.JustMap;
 import ru.bulldog.justmap.util.LangUtil;
 import ru.bulldog.justmap.util.render.RenderUtil;
+
+import java.util.HashMap;
 
 public abstract class AbstractJustMapScreen extends Screen {
 	public static final Identifier DEFAULT_TEXTURE = new Identifier("textures/block/dirt.png");
@@ -53,24 +52,24 @@ public abstract class AbstractJustMapScreen extends Screen {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+	public void render(DrawContext  drawContext, int mouseX, int mouseY, float delta) {
 		RenderSystem.disableDepthTest();
-		this.renderBackground(matrices);
-		this.renderForeground(matrices);
+		this.renderBackground(drawContext);
+		this.renderForeground(drawContext);
 		for (Element e : children()) {
 			if (e instanceof Drawable) {
-				((Drawable) e).render(matrices, mouseX, mouseY, delta);
+				((Drawable) e).render(drawContext, mouseX, mouseY, delta);
 			}
 		}
 		RenderSystem.enableDepthTest();
 	}
 
-	public void renderBackground(MatrixStack matrixStack) {
-		fill(matrixStack, 0, 0, width, height, 0x88444444);
+	public void renderBackground(DrawContext drawContext) {
+		drawContext.fill(0, 0, width, height, 0x88444444);
 		this.drawBorders();
 	}
 
-	public void renderForeground(MatrixStack matrixStack) {}
+	public void renderForeground(DrawContext drawContext) {}
 
 	@Override
 	public void close() {

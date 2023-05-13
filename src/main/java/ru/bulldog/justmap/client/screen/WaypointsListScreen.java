@@ -1,15 +1,12 @@
 package ru.bulldog.justmap.client.screen;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import ru.bulldog.justmap.JustMap;
@@ -24,6 +21,9 @@ import ru.bulldog.justmap.util.colors.Colors;
 import ru.bulldog.justmap.util.math.MathUtil;
 import ru.bulldog.justmap.util.math.RandomUtil;
 import ru.bulldog.justmap.util.render.RenderUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WaypointsListScreen extends AbstractJustMapScreen {
 	private static class Entry implements Element {
@@ -68,17 +68,17 @@ public class WaypointsListScreen extends AbstractJustMapScreen {
 			}
 		}
 
-		public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+		public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
 			TextRenderer font = minecraft.textRenderer;
 
 			boolean hover = isMouseOver(mouseX, mouseY);
 			int bgColor = hover ? 0x88AAAAAA : 0x88333333;
-			fill(matrixStack, x, y, x + width, y + height, bgColor);
+			drawContext.fill( x, y, x + width, y + height, bgColor);
 
 			int iconSize = height - 2;
 			Icon icon = waypoint.getIcon();
 			if (icon != null) {
-				icon.draw(matrixStack, x, y + 1, iconSize, iconSize);
+				icon.draw(drawContext, x, y + 1, iconSize, iconSize);
 			} else {
 				RenderUtil.drawDiamond(x, y + 1, iconSize, iconSize, waypoint.color);
 			}
@@ -86,16 +86,16 @@ public class WaypointsListScreen extends AbstractJustMapScreen {
 			int stringY = y + 7;
 			int nameX = x + iconSize + 2;
 
-			RenderUtil.drawTextWithShadow(matrixStack, font, waypoint.name, nameX, stringY, Colors.WHITE);
+			RenderUtil.drawTextWithShadow(drawContext, font, waypoint.name, nameX, stringY, Colors.WHITE);
 
 			int posX = tpButton.getX() - 5;
-			RenderUtil.drawRightAlignedString(matrixStack, waypoint.pos.toShortString(), posX, stringY, Colors.WHITE);
+			RenderUtil.drawRightAlignedString(drawContext, waypoint.pos.toShortString(), posX, stringY, Colors.WHITE);
 
 			if (GameRulesUtil.allowTeleportation()) {
-				this.tpButton.render(matrixStack, mouseX, mouseY, delta);
+				this.tpButton.render(drawContext, mouseX, mouseY, delta);
 			}
-			this.editButton.render(matrixStack, mouseX, mouseY, delta);
-			this.deleteButton.render(matrixStack, mouseX, mouseY, delta);
+			this.editButton.render(drawContext, mouseX, mouseY, delta);
+			this.deleteButton.render(drawContext, mouseX, mouseY, delta);
 		}
 
 		@Override
@@ -234,16 +234,16 @@ public class WaypointsListScreen extends AbstractJustMapScreen {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
-		super.render(matrixStack, mouseX, mouseY, delta);
+	public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+		super.render(drawContext, mouseX, mouseY, delta);
 
-		this.entries.forEach(e -> e.render(matrixStack, mouseX, mouseY, delta));
+		this.entries.forEach(e -> e.render(drawContext, mouseX, mouseY, delta));
 
 		String screenTitle = this.currentWorld.getName();
 		if (screenTitle == null) {
 			screenTitle = info == null ? lang("unknown").getString() : I18n.translate(info.getFirst());
 		}
-		drawCenteredTextWithShadow(matrixStack, textRenderer, screenTitle, center, 15, Colors.WHITE);
+		drawContext.drawCenteredTextWithShadow( textRenderer, screenTitle, center, 15, Colors.WHITE);
 		this.drawScrollBar();
 	}
 

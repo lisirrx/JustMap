@@ -1,11 +1,9 @@
 package ru.bulldog.justmap.client.render;
 
-import java.util.List;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import ru.bulldog.justmap.client.config.ClientSettings;
 import ru.bulldog.justmap.map.ChunkGrid;
@@ -16,13 +14,15 @@ import ru.bulldog.justmap.map.minimap.Minimap;
 import ru.bulldog.justmap.util.render.GLC;
 import ru.bulldog.justmap.util.render.RenderUtil;
 
+import java.util.List;
+
 public class FastMiniMapRenderer extends AbstractMiniMapRenderer {
 
 	public FastMiniMapRenderer(Minimap map) {
 		super(map);
 	}
 
-	protected void render(MatrixStack matrices, double scale) {
+	protected void render(DrawContext drawContext, double scale) {
 		Framebuffer minecraftFramebuffer = minecraft.getFramebuffer();
 		int fbuffH = minecraftFramebuffer.viewportHeight;
 		int scissX = (int) (mapX * scale);
@@ -44,17 +44,17 @@ public class FastMiniMapRenderer extends AbstractMiniMapRenderer {
 			RenderUtil.endDraw();
 			RenderSystem.blendFunc(GLC.GL_DST_ALPHA, GLC.GL_ONE_MINUS_DST_ALPHA);
 		}
-		matrices.push();
+		drawContext.getMatrices().push();
 		if (mapRotation) {
 			float moveX = mapX + mapWidth / 2.0F;
 			float moveY = mapY + mapHeight / 2.0F;
-			matrices.translate(moveX, moveY, 0.0);
-			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-rotation + 180));
-			matrices.translate(-moveX, -moveY, 0.0);
+			drawContext.getMatrices().translate(moveX, moveY, 0.0);
+			drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-rotation + 180));
+			drawContext.getMatrices().translate(-moveX, -moveY, 0.0);
 		}
-		matrices.translate(-offX, -offY, 0.0);
+		drawContext.getMatrices().translate(-offX, -offY, 0.0);
 
-		this.drawMap(matrices);
+		this.drawMap(drawContext);
 		if (ClientSettings.showGrid) {
 			this.drawGrid();
 		}
@@ -62,21 +62,21 @@ public class FastMiniMapRenderer extends AbstractMiniMapRenderer {
 		VertexConsumerProvider.Immediate consumerProvider = minecraft.getBufferBuilders().getEntityVertexConsumers();
 		List<MapIcon<?>> drawableEntities = minimap.getDrawableIcons(lastX, lastZ, centerX, centerY, delta);
 		for (MapIcon<?> icon : drawableEntities) {
-			icon.draw(matrices, consumerProvider, mapX, mapY, mapWidth, mapHeight, rotation);
+			icon.draw(drawContext, consumerProvider, mapX, mapY, mapWidth, mapHeight, rotation);
 		}
 		consumerProvider.draw();
 
-		matrices.pop();
+		drawContext.getMatrices().pop();
 
 		List<WaypointIcon> drawableWaypoints = minimap.getWaypoints(playerPos, centerX, centerY);
 		for (WaypointIcon icon : drawableWaypoints) {
-			icon.draw(matrices, consumerProvider, mapX, mapY, mapWidth, mapHeight, offX, offY, rotation);
+			icon.draw(drawContext, consumerProvider, mapX, mapY, mapWidth, mapHeight, offX, offY, rotation);
 		}
 		consumerProvider.draw();
 		RenderUtil.disableScissor();
 	}
 
-	private void drawMap(MatrixStack matrices) {
+	private void drawMap(DrawContext drawContext) {
 		int cornerX = lastX - scaledW / 2;
 		int cornerZ = lastZ - scaledH / 2;
 
@@ -104,7 +104,7 @@ public class FastMiniMapRenderer extends AbstractMiniMapRenderer {
 				double scW = (double) texW / mapScale;
 				double scH = (double) texH / mapScale;
 
-				region.drawLayer(matrices, minimap.getLayer(), minimap.getLevel(), imgX + scX, imgY + scY, scW, scH, texX, texY, texW, texH);
+				region.drawLayer(drawContext, minimap.getLayer(), minimap.getLevel(), imgX + scX, imgY + scY, scW, scH, texX, texY, texW, texH);
 
 				picY += texH > 0 ? texH : 512;
 			}

@@ -1,11 +1,5 @@
 package ru.bulldog.justmap.client.config;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AtomicDouble;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
@@ -21,6 +15,12 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FloatSliderEntry extends TooltipListEntry<Float> {
 
@@ -126,17 +126,17 @@ public class FloatSliderEntry extends TooltipListEntry<Float> {
 		this.sliderWidget.setY(y);
 		Text displayedFieldName = getDisplayedFieldName();
 		if (textRenderer.isRightToLeft()) {
-			textRenderer.drawWithShadow(matrices, displayedFieldName, window.getScaledWidth() - x - textRenderer.getWidth(displayedFieldName), y + 5, getPreferredTextColor());
+//			textRenderer.drawWithShadow(matrices, displayedFieldName, window.getScaledWidth() - x - textRenderer.getWidth(displayedFieldName), y + 5, getPreferredTextColor());
 			this.resetButton.setX(x);
 			this.sliderWidget.setX(x + resetButton.getWidth() + 1);
 		} else {
-			textRenderer.drawWithShadow(matrices, displayedFieldName, x, y + 5, getPreferredTextColor());
+//			textRenderer.drawWithShadow(matrices, displayedFieldName, x, y + 5, getPreferredTextColor());
 			this.resetButton.setX(x + entryWidth - resetButton.getWidth());
 			this.sliderWidget.setX(x + entryWidth - 150);
 		}
 		this.sliderWidget.setWidth(150 - resetButton.getWidth() - 2);
-		resetButton.render(matrices, mouseX, mouseY, delta);
-		sliderWidget.render(matrices, mouseX, mouseY, delta);
+//		resetButton.render(matrices, mouseX, mouseY, delta);
+//		sliderWidget.render(matrices, mouseX, mouseY, delta);
 	}
 
 	@Override

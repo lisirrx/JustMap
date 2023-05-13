@@ -1,16 +1,14 @@
 package ru.bulldog.justmap.client.render;
 
-import java.util.List;
-
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.systems.VertexSorter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
-
 import org.joml.Matrix4f;
 import ru.bulldog.justmap.JustMap;
 import ru.bulldog.justmap.client.config.ClientSettings;
@@ -22,6 +20,8 @@ import ru.bulldog.justmap.map.minimap.Minimap;
 import ru.bulldog.justmap.util.render.ExtendedFramebuffer;
 import ru.bulldog.justmap.util.render.GLC;
 import ru.bulldog.justmap.util.render.RenderUtil;
+
+import java.util.List;
 
 public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 
@@ -49,7 +49,7 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 	}
 
 	@Override
-	protected void render(MatrixStack matrices, double scale) {
+	protected void render(DrawContext drawContext, double scale) {
 		VertexConsumerProvider.Immediate consumerProvider = minecraft.getBufferBuilders().getEntityVertexConsumers();
 
 		int scaledW = (int) (imgW * scale);
@@ -68,41 +68,41 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 			this.paramsUpdated = false;
 		}
 
-		matrices.push();
+		drawContext.getMatrices().push();
 		this.primaryFramebuffer.beginWrite(true);
 		RenderSystem.clear(GLC.GL_COLOR_OR_DEPTH_BUFFER_BIT, isMac);
 		RenderSystem.backupProjectionMatrix();
 		Matrix4f orthographic = projectionMatrix(0.0F, scaledW, 0.0F, scaledH, 1000.0F, 3000.0F);
-		RenderSystem.setProjectionMatrix(orthographic);
-		matrices.loadIdentity();
-		matrices.translate(0.0F, 0.0F, -2000.0F);
-		matrices.scale((float) scale, (float) scale, 1.0F);
+		RenderSystem.setProjectionMatrix(orthographic, VertexSorter.BY_DISTANCE);
+		drawContext.getMatrices().loadIdentity();
+		drawContext.getMatrices().translate(0.0F, 0.0F, -2000.0F);
+		drawContext.getMatrices().scale((float) scale, (float) scale, 1.0F);
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.enableBlend();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		this.drawMap(matrices);
+		this.drawMap(drawContext);
 		if (ClientSettings.showGrid) {
 			this.drawGrid();
 		}
 		if (!mapRotation) {
-			this.drawEntities(matrices, consumerProvider);
+			this.drawEntities(drawContext, consumerProvider);
 		}
 		this.primaryFramebuffer.endWrite();
-		matrices.pop();
+		drawContext.getMatrices().pop();
 
 		this.secondaryFramebuffer.beginWrite(false);
 		RenderSystem.clear(GLC.GL_COLOR_OR_DEPTH_BUFFER_BIT, isMac);
-		matrices.push();
+		drawContext.getMatrices().push();
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.enableCull();
 		if (mapRotation) {
 			float shiftX = scaledW / 2.0F;
 			float shiftY = scaledH / 2.0F;
-			matrices.translate(shiftX, shiftY, 0.0);
-			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F - rotation));
-			matrices.translate(-shiftX, -shiftY, 0.0);
+			drawContext.getMatrices().translate(shiftX, shiftY, 0.0);
+			drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F - rotation));
+			drawContext.getMatrices().translate(-shiftX, -shiftY, 0.0);
 		}
-		matrices.translate(-offX * scale, -offY * scale, 0.0);
+		drawContext.getMatrices().translate(-offX * scale, -offY * scale, 0.0);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 		this.primaryFramebuffer.beginRead();
@@ -114,16 +114,16 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 		buffer.vertex(0.0, 0.0, 0.0).texture(0.0F, 1.0F).next();
 		RenderUtil.endDraw();
 		if (mapRotation) {
-			matrices.push();
-			matrices.scale((float) scale, (float) scale, 1.0F);
-			this.drawEntities(matrices, consumerProvider);
-			matrices.pop();
+			drawContext.getMatrices().push();
+			drawContext.getMatrices().scale((float) scale, (float) scale, 1.0F);
+			this.drawEntities(drawContext, consumerProvider);
+			drawContext.getMatrices().pop();
 		}
-		matrices.pop();
+		drawContext.getMatrices().pop();
 		this.secondaryFramebuffer.endWrite();
 		RenderSystem.restoreProjectionMatrix();
 		RenderSystem.applyModelViewMatrix();
-		matrices.pop();
+		drawContext.getMatrices().pop();
 
 		Framebuffer minecraftFramebuffer = minecraft.getFramebuffer();
 		int fbuffW = minecraftFramebuffer.viewportWidth;
@@ -146,8 +146,8 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 			RenderUtil.drawQuad(mapX, mapY, mapWidth, mapHeight);
 			RenderSystem.blendFunc(GLC.GL_DST_ALPHA, GLC.GL_ONE_MINUS_DST_ALPHA);
 		}
-		matrices.push();
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+		drawContext.getMatrices().push();
+		drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 		this.secondaryFramebuffer.beginRead();
 		RenderUtil.startDraw();
@@ -157,10 +157,10 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 		buffer.vertex(imgX + imgW, imgY, 0.0).texture(1.0F, 1.0F).next();
 		buffer.vertex(imgX, imgY, 0.0).texture(0.0F, 1.0F).next();
 		RenderUtil.endDraw();
-		matrices.pop();
+		drawContext.getMatrices().pop();
 		List<WaypointIcon> drawableWaypoints = minimap.getWaypoints(playerPos, centerX, centerY);
 		for (WaypointIcon icon : drawableWaypoints) {
-			icon.draw(matrices, consumerProvider, mapX, mapY, mapWidth, mapHeight, offX, offY, rotation);
+			icon.draw(drawContext, consumerProvider, mapX, mapY, mapWidth, mapHeight, offX, offY, rotation);
 		}
 		consumerProvider.draw();
 		RenderUtil.disableScissor();
@@ -182,7 +182,7 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 		return matrix4f;
 	}
 
-	private void drawMap(MatrixStack matrices) {
+	private void drawMap(DrawContext drawContext) {
 		int cornerX = lastX - scaledW / 2;
 		int cornerZ = lastZ - scaledH / 2;
 
@@ -210,7 +210,7 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 				double scW = (double) texW / mapScale;
 				double scH = (double) texH / mapScale;
 
-				region.drawLayer(matrices, minimap.getLayer(), minimap.getLevel(), scX, scY, scW, scH, texX, texY, texW, texH);
+				region.drawLayer(drawContext, minimap.getLayer(), minimap.getLevel(), scX, scY, scW, scH, texX, texY, texW, texH);
 
 				picY += texH > 0 ? texH : 512;
 			}
@@ -228,14 +228,14 @@ public class BufferedMiniMapRenderer extends AbstractMiniMapRenderer {
 		this.chunkGrid.draw();
 	}
 
-	private void drawEntities(MatrixStack matrices, VertexConsumerProvider.Immediate consumerProvider) {
+	private void drawEntities(DrawContext drawContext, VertexConsumerProvider.Immediate consumerProvider) {
 		float halfW = imgW / 2.0F;
 		float halfH = imgH / 2.0F;
 		int iconX = imgW - mapWidth;
 		int iconY = imgH - mapHeight;
 		List<MapIcon<?>> drawableEntities = minimap.getDrawableIcons(lastX, lastZ, halfW, halfH, delta);
 		for (MapIcon<?> icon : drawableEntities) {
-			icon.draw(matrices, consumerProvider, iconX, iconY, mapWidth, mapHeight, rotation);
+			icon.draw(drawContext, consumerProvider, iconX, iconY, mapWidth, mapHeight, rotation);
 			consumerProvider.draw();
 		}
 	}

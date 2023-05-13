@@ -1,9 +1,5 @@
 package ru.bulldog.justmap.map.minimap;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
@@ -14,14 +10,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-
 import ru.bulldog.justmap.JustMap;
-import ru.bulldog.justmap.advancedinfo.AdvancedInfo;
-import ru.bulldog.justmap.advancedinfo.BiomeInfo;
-import ru.bulldog.justmap.advancedinfo.CoordsInfo;
-import ru.bulldog.justmap.advancedinfo.InfoText;
-import ru.bulldog.justmap.advancedinfo.TextManager;
-import ru.bulldog.justmap.advancedinfo.TimeInfo;
+import ru.bulldog.justmap.advancedinfo.*;
 import ru.bulldog.justmap.client.JustMapClient;
 import ru.bulldog.justmap.client.config.ClientConfig;
 import ru.bulldog.justmap.client.config.ClientSettings;
@@ -49,6 +39,10 @@ import ru.bulldog.justmap.util.GameRulesUtil;
 import ru.bulldog.justmap.util.math.MathUtil;
 import ru.bulldog.justmap.util.math.RandomUtil;
 import ru.bulldog.justmap.util.render.ExtendedFramebuffer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class Minimap implements IMap {
 	private static final TextManager textManager;
@@ -283,7 +277,7 @@ public class Minimap implements IMap {
 	}
 
 	public void prepareMapOnTick(PlayerEntity player) {
-		this.world = player.world;
+		this.world = player.getWorld();
 		this.worldMapper = MapDataProvider.getManager().getWorldMapper();
 		BlockPos pos = CurrentWorldPos.currentPos();
 

@@ -1,17 +1,13 @@
 package ru.bulldog.justmap.map.waypoint;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
-
 import ru.bulldog.justmap.JustMap;
 import ru.bulldog.justmap.map.multiworld.WorldKey;
 import ru.bulldog.justmap.util.Dimension;
@@ -22,6 +18,9 @@ import ru.bulldog.justmap.util.colors.Colors;
 import ru.bulldog.justmap.util.math.RandomUtil;
 import ru.bulldog.justmap.util.render.Image;
 import ru.bulldog.justmap.util.render.RenderUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Waypoint {
 
@@ -226,9 +225,9 @@ public class Waypoint {
 		}
 
 		@Override
-		public void draw(MatrixStack matrices, double x, double y, int w, int h) {
+		public void draw(DrawContext drawContext, double x, double y, int w, int h) {
 			this.bindTexture();
-			this.draw(matrices, x, y, (float) w, (float) h);
+			this.draw(drawContext, x, y, (float) w, (float) h);
 		}
 
 		private Identifier getColoredTexture() {

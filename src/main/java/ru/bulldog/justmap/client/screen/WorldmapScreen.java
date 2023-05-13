@@ -1,14 +1,10 @@
 package ru.bulldog.justmap.client.screen;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -32,13 +28,13 @@ import ru.bulldog.justmap.map.icon.WaypointIcon;
 import ru.bulldog.justmap.map.multiworld.WorldKey;
 import ru.bulldog.justmap.map.waypoint.Waypoint;
 import ru.bulldog.justmap.map.waypoint.WaypointKeeper;
-import ru.bulldog.justmap.util.CurrentWorldPos;
-import ru.bulldog.justmap.util.Dimension;
-import ru.bulldog.justmap.util.GameRulesUtil;
-import ru.bulldog.justmap.util.LangUtil;
-import ru.bulldog.justmap.util.PosUtil;
+import ru.bulldog.justmap.util.*;
 import ru.bulldog.justmap.util.colors.Colors;
 import ru.bulldog.justmap.util.math.MathUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 
@@ -158,13 +154,13 @@ public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 	}
 
 	@Override
-	public void renderBackground(MatrixStack matrixStack) {
-		fill(matrixStack, x, 0, x + width, height, 0xFF444444);
-		this.drawMap(matrixStack);
+	public void renderBackground(DrawContext drawContext) {
+		drawContext.fill(x, 0, x + width, height, 0xFF444444);
+		this.drawMap(drawContext);
 	}
 
 	@Override
-	public void renderForeground(MatrixStack matrices) {
+	public void renderForeground(DrawContext drawContext) {
 		if (ClientSettings.showWorldmapGrid) {
 			this.chunkGrid.draw();
 		}
@@ -177,7 +173,7 @@ public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 				MathUtil.screenPos(icon.waypoint.pos.getZ(), centerPos.getZ(), centerY, imageScale),
 				icon.waypoint.pos.getY()
 			);
-			icon.draw(iconSize);
+			icon.draw(drawContext,  iconSize);
 		}
 		for (PlayerIcon icon : players) {
 			icon.setPosition(
@@ -185,7 +181,7 @@ public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 				MathUtil.screenPos(icon.getZ(), centerPos.getZ(), centerY, imageScale),
 				(int) icon.getY()
 			);
-			icon.draw(matrices, iconSize);
+			icon.draw(drawContext, iconSize);
 		}
 
 		ClientPlayerEntity player = client.player;
@@ -195,13 +191,13 @@ public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 		double arrowX = MathUtil.screenPos(playerX, centerPos.getX(), centerX, imageScale);
 		double arrowY = MathUtil.screenPos(playerZ, centerPos.getZ(), centerY, imageScale);
 
-		MapPlayerManager.getPlayer(player).getIcon().draw(arrowX, arrowY, iconSize, true);
+		MapPlayerManager.getPlayer(player).getIcon().draw(drawContext, arrowX, arrowY, iconSize, true);
 
 		this.drawBorders(paddingTop, paddingBottom);
-		drawCenteredTextWithShadow(matrices, client.textRenderer, cursorCoords, width / 2, paddingTop + 4, Colors.WHITE);
+        drawContext.drawCenteredTextWithShadow(client.textRenderer, cursorCoords, width / 2, paddingTop + 4, Colors.WHITE);
 	}
 
-	private void drawMap(MatrixStack matrices) {
+	private void drawMap(DrawContext drawContext) {
 		int cornerX = centerPos.getX() - scaledWidth / 2;
 		int cornerZ = centerPos.getZ() - scaledHeight / 2;
 
@@ -232,7 +228,7 @@ public class WorldmapScreen extends AbstractJustMapScreen implements IMap {
 
 				RenderSystem.enableBlend();
 				RenderSystem.defaultBlendFunc();
-				region.drawLayer(matrices, mapLayer, mapLevel, scX, scY, scW, scH, imgX, imgY, imgW, imgH);
+				region.drawLayer(drawContext, mapLayer, mapLevel, scX, scY, scW, scH, imgX, imgY, imgW, imgH);
 
 				picY += imgH > 0 ? imgH : 512;
 			}
